@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Exercise the shipped APIs in disposable xata-chart-* clusters. Never prints credentials."""
+"""Exercise APIs in test clusters or an explicitly authorized context. Never prints credentials."""
 import base64, hashlib, json, os, pathlib, ssl, subprocess, time, urllib.request, urllib.error
 KUBE=os.environ['KUBECONFIG']; NS=os.environ.get('XATA_TEST_NAMESPACE','xata')
 K=['kubectl','--kubeconfig',KUBE,'-n',NS]
 def run(*args): return subprocess.check_output(K+list(args),text=True,stderr=subprocess.PIPE)
 context=run('config','current-context').strip()
-assert 'xata-chart-' in context, 'Refusing to create a development identity outside a test cluster'
+assert 'xata-chart-' in context or context == os.environ.get('XATA_TEST_ALLOWED_CONTEXT'), 'Set XATA_TEST_ALLOWED_CONTEXT to explicitly authorize development identity creation on this cluster'
 for deployment in ['auth','projects','gateway']:
  run('rollout','status','deployment/'+deployment,'--timeout=300s')
 run('wait','--for=condition=Ready','pod/auth-keycloak-0','--timeout=300s')

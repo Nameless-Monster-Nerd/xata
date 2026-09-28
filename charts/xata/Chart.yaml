@@ -4,7 +4,7 @@ description: Standalone Xata PostgreSQL platform (preview)
 type: application
 version: 0.1.0-dev.2
 appVersion: 98ced3c
-kubeVersion: '>=1.34.0-0 <1.35.0-0'
+kubeVersion: '>=1.34.0-0 <1.36.0-0'
 home: https://github.com/xataio/xata
 sources:
 - https://github.com/xataio/xata

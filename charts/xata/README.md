@@ -41,6 +41,21 @@ helm test xata --namespace xata --timeout 5m
 
 One installation is supported per Kubernetes cluster. Upstream component charts use fixed service names and cluster-wide RBAC names. Do not install a second release side by side or adopt an existing Xata installation without an ownership/data migration plan.
 
+For a local single-node k3d cluster with HostPath CSI and its snapshot controller
+already installed, use `-f charts/xata/examples/k3d-local.yaml` from this checkout.
+The chart accepts Kubernetes 1.34 and 1.35. Inspect existing Tilt resources and
+CRD ownership before installing into a reused cluster. Use `--skip-crds` only
+after verifying all required CRDs and served API versions are present. Helm 4
+may require `--server-side=false` when updating explicitly adopted Tilt resources.
+Setup Jobs disable Kubernetes Service environment injection so a pre-existing
+`postgres` Service cannot replace the application's database port setting.
+
+`tests/helm/api_smoke.py` normally restricts itself to disposable test clusters.
+To run it on an explicitly selected local context, set `XATA_TEST_ALLOWED_CONTEXT`
+to that exact context name along with `KUBECONFIG` and `XATA_TEST_NAMESPACE`.
+It creates a development identity and a `helm-verification` project/database;
+`XATA_TEST_EXTENDED=true` also verifies snapshot and backup restores.
+
 ## Single-node and multi-node
 
 Use `examples/single-node.yaml` or `examples/multi-node.yaml` with `-f`. The multi-node profile runs three metadata PostgreSQL instances on distinct hosts, two Keycloak instances and two replicas of stateless services. Branch-operator remains a single controller until concurrent controller operation is verified. Per-database replicas are selected through Xata's API/CLI: request two read replicas for a three-instance database. Changing the chart profile does not silently resize existing customer databases.

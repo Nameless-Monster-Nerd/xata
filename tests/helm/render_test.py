@@ -71,6 +71,7 @@ for profile in ['single-node', 'multi-node']:
         assert waiter['command'] == ['kubectl']
         assert 'job/'+name+'-setup-1' in waiter['args']
         job = resources['Job', 'tenant-control', name+'-setup-1']['spec']
+        assert job['template']['spec']['enableServiceLinks'] is False, 'Service environment variables can override database settings'
         assert job['parallelism'] == job['completions'] == 1
         assert 'ttlSecondsAfterFinished' not in job, 'replacement pods still need setup completion'
         setup = job['template']['spec']['containers'][0]
@@ -91,3 +92,6 @@ listeners = [d['spec']['listeners'][0] for d in production if d['kind']=='Gatewa
 assert all(listener['protocol']=='HTTPS' and listener['port']==443 and listener['tls']['certificateRefs'] for listener in listeners)
 render(['--set','api-gateway.gateway.hostname=api.example.com'],success=False)
 print('PASS: existing operators and invalid-value rejection')
+render(['--kube-version', '1.35.5'])
+render(['--kube-version', '1.36.0'], success=False)
+print('PASS: Kubernetes 1.35 rendering and unqualified 1.36 rejection')
